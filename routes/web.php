@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Controller;
+use App\Models\city;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return city::find(1) ;
 });
 
