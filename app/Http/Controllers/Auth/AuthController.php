@@ -114,7 +114,7 @@ class AuthController extends Controller
             }
 
         }catch(\Exception $e){
-            // return $this->returnError($e->getMessage(), [], 400);
+            return $this->returnError($e->getMessage(), [], 400);
             return $this->returnError(__('message.error'), 500);
 
         }

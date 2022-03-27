@@ -16,8 +16,10 @@ class profile_controller extends Controller
         3- get post profile
         4- get album profile
         5- get statis profile
+        6- get about profile
 
     */
+
  use GeneralTrait ;
      // get profile
     public function get_profile($id){
@@ -113,6 +115,54 @@ class profile_controller extends Controller
         }
 
     }
+
+    // get album profile
+    public function get_album_profile($id){
+        try{
+            $user = User::find($id);
+            if($user){
+                $albums = $user->album()->get();
+
+                if($albums){
+                    // foreach($albums as $key => $album){
+                    //     $albums[$key]->photo = $album->photo()->get();
+                    // }
+                    return $this->returnData('Get All Data In Album ' , 'albums', $albums);
+                }else{
+                    return $this->returnError('Album Not Found', 404);
+                }
+            }else{
+                return $this->returnError(__('message.user_not_found') , 404);
+            }
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+    }
+
+    // get about profile
+    public function get_about_profile($id){
+        try{
+            $user = User::find($id);
+            if($user){
+                $about = $user->profile()->get();
+                if($about){
+                    return $this->returnData('Get All Data In About ' , 'about', $about);
+                }else{
+                    return $this->returnError('About Not Found', 404);
+                }
+            }else{
+                return $this->returnError(__('message.user_not_found') , 404);
+            }
+        }catch(\Exception $e){
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+    }
+
+    // get statis profile
+
+
 
 
 

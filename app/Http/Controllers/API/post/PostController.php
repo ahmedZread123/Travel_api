@@ -115,7 +115,6 @@ class PostController extends Controller
                 'video' => 'mimes:mp4,mov,ogg,qt|max:20000',
                 'group_id' => 'exists:groups,id',
             ],$this->message());
-
             if($validator->fails()){
                 $code = $this->returnCodeAccordingToInput($validator);
                 return $this->returnValidationError( $code ,$validator);

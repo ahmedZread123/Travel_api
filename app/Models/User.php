@@ -122,6 +122,12 @@ class User extends Authenticatable implements JWTSubject  , MustVerifyEmail
         return $this->hasOne(profile::class);
     }
 
+    // album
+    public function album()
+    {
+        return $this->hasMany(album::class);
+    }
+
 
 
 }
