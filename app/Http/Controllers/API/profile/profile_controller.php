@@ -27,7 +27,10 @@ class profile_controller extends Controller
             $user = User::find($id);
             if($user){
 
-            $profile = $user->profile()->get();
+            $profile = $user->profile()->first();
+            $profile->followers= $user->followers()->count();
+            $profile->following= $user->following()->count();
+
             if($profile){
                 return $this->returnData('Get All Data In Profile ' , 'profile', $profile);
             }else{
@@ -37,7 +40,8 @@ class profile_controller extends Controller
                 return $this->returnError(__('message.user_not_found') , 404);
             }
         }catch(\Exception $e){
-            return response()->json(['error' => $e->getMessage()], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
+            return $this->returnError(__('message.error') , 500);
         }
 
     }
@@ -47,7 +51,7 @@ class profile_controller extends Controller
         try{
             $user = User::find($id);
             if($user){
-                $profile = $user->profile()->get();
+                $profile = $user->profile()->first();
                 if($profile){
 
                     // save photo
@@ -76,15 +80,18 @@ class profile_controller extends Controller
                         'photo'        => $photo ,
 
                     ]);
+
                     return $this->returnData('Update Profile Successfully' , 'profile', $profile);
                 }else{
                     return $this->returnError('Profile Not Found', 404);
                 }
             }else{
-                return $this->returnError(__('message.user_not_found') , 404);
+                return $this->returnError(__('message.user_ont_found') , 404);
             }
         }catch(\Exception $e){
-            return response()->json(['error' => $e->getMessage()], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
+            return $this->returnError(__('message.error') , 500);
+
         }
 
     }
@@ -95,12 +102,12 @@ class profile_controller extends Controller
         try{
             $user = User::find($id);
             if($user){
-                $posts = $user->post()->get();
+                $posts = $user->posts()->get();
                 if($posts){
                     foreach($posts as $key => $post){
-                        $posts[$key]->comment = $post->comment()->get();
-                        $posts[$key]->like = $post->like()->get();
-                        $posts[$key]->share = $post->share()->get();
+                        $posts[$key]->comment = $post->comments()->get();
+                        $posts[$key]->like = $post->likes()->get();
+                        $posts[$key]->share = $post->shares()->get();
                         $posts[$key]->saves = $post->saves()->get();
                     }
                     return $this->returnData('Get All Data In Post ' , 'post', $posts);
@@ -108,7 +115,7 @@ class profile_controller extends Controller
                     return $this->returnError('Post Not Found', 404);
                 }
             }else{
-                return $this->returnError(__('message.user_not_found') , 404);
+                return $this->returnError(__('message.user_ont_found') , 404);
             }
         }catch(\Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);

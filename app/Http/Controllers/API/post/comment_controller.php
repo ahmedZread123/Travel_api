@@ -4,10 +4,14 @@ namespace App\Http\Controllers\API\post;
 
 use App\Http\Controllers\Controller;
 use App\Models\comment;
+use App\Models\post;
 use App\Models\User;
+use App\Notifications\post\comment_notification;
 use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification as FacadesNotification;
 
 class comment_controller extends Controller
 {
@@ -43,6 +47,10 @@ class comment_controller extends Controller
             // return data
             if($comment){
                 $comment = comment::where('id', $comment->id)->first();
+                $post =post:: find($request->post_id);
+                $user =  $post->user()->first() ;
+                // $user->notifiay(new comment_notification($comment));
+                FacadesNotification::sendNow($user, new comment_notification($comment , $user));
                 return $this->returnData(__('message.s_create_comment'), 'comment', $comment);
             }else{
                 return $this->returnError(__('message.r_create_comment'), [], 404);
@@ -51,7 +59,7 @@ class comment_controller extends Controller
 
         }catch(\Exception $ex){
             DB::rollBack() ;
-            // return $this->returnError($ex->getCode(),$ex->getMessage());
+            return $this->returnError($ex->getCode(),$ex->getMessage());
             return $this->returnError(__('message.error'), [] );
 
         }

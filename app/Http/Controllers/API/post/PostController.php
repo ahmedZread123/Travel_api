@@ -197,6 +197,7 @@ class PostController extends Controller
             }
         }catch(\Exception $ex){
             DB::rollBack();
+            // return $this->returnError($ex->getMessage(),  500);
             return $this->returnError(__('message.error'), [] );
         }
     }

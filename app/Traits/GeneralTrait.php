@@ -2,7 +2,9 @@
 
 namespace App\Traits;
 
+use Carbon\Carbon;
 use Cloudinary\Cloudinary;
+use Cloudinary\Transformation\Format;
 use Sami\Parser\Filter\CloudinaryFilter;
 
 trait GeneralTrait
@@ -99,7 +101,7 @@ trait GeneralTrait
 
     }
 
-
+    // message valedaition
     public function message(){
         return [
             'name.required'        => __('validation.name_required'),
@@ -147,6 +149,12 @@ trait GeneralTrait
             'address.max'          =>  __('validation.address_max'),
             'code.required'        =>  __('validation.code_required'),
         ] ;
+    }
+
+    // formate time
+    public function time($time)
+    {
+      return   Carbon::parse($time)->locale($this->getCurrentLang())-> diffForHumans(  );
     }
 
 }

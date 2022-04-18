@@ -8,10 +8,11 @@ use App\Models\share_post;
 use App\Models\like;
 use App\Models\comment;
 use App\Models\save_psot;
+use App\Traits\GeneralTrait;
 class post extends Model
 {
     use HasFactory;
-
+    use GeneralTrait;
     protected $fillable = [
         'text',
         'photo',
@@ -58,6 +59,17 @@ class post extends Model
     public function setphotoAttribute($photo)
     {
         $this->attributes['photo'] = json_encode($photo);
+    }
+
+
+    // created_at
+        public function getCreatedAtAttribute(){
+        return $this->time($this->attributes['created_at']);
+    }
+
+    // updated_at
+    public function getUpdatedAtAttribute(){
+        return $this->time($this->attributes['updated_at']);
     }
 
 

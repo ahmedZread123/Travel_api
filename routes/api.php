@@ -12,6 +12,8 @@ use App\Http\Controllers\API\post\like_post_cotroller as  APIlike_post_cotroller
 use App\Http\Controllers\API\post\PostController;
 use App\Http\Controllers\API\post\save_post_controller;
 use App\Http\Controllers\API\post\share_post_controller;
+use App\Http\Controllers\API\profile\album_controller;
+use App\Http\Controllers\API\profile\profile_controller;
 use App\Http\Controllers\API\trip\accommodation_controller;
 use App\Http\Controllers\API\trip\CarRental_controller;
 use App\Http\Controllers\API\trip\flight_controller;
@@ -177,6 +179,20 @@ Route::group(['middleware' =>'api'] , function(){
     // trip transportation
     Route::post('create_transportation' , [transportation_controller::class , 'create_transportation']);
     // end trip transportation
+
+    // profile
+
+        Route::get('get_profile/{id}',[ profile_controller::class  , 'get_profile']);
+        Route::post('update_profile/{id}', [ profile_controller::class  , 'update_profile']);
+        Route::get('get_post_profile/{id}', [ profile_controller::class  , 'get_post_profile']);
+        Route::get('get_album_profile/{id}', [ profile_controller::class  , 'get_album_profile']);
+        Route::get('get_about_profile/{id}', [ profile_controller::class  , 'get_about_profile']);
+
+
+    // end profile
+    // album
+    Route::post('create_album' , [album_controller::class , 'create_album']);
+    // end album
 
   });
 

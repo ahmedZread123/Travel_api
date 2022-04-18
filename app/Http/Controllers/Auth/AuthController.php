@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\profile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\GeneralTrait;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use validator ;
 class AuthController extends Controller
@@ -88,8 +90,8 @@ class AuthController extends Controller
             ] , $this->message());
 
             if ($validator->fails()) {
-            $code = $this->returnCodeAccordingToInput($validator);
-            return $this->returnValidationError( $code ,$validator);
+             $code = $this->returnCodeAccordingToInput($validator);
+             return $this->returnValidationError( $code ,$validator);
             }
 
             // check if user exist
@@ -97,7 +99,7 @@ class AuthController extends Controller
             if ($user) {
                 return $this->returnError(__('auth.email_exist'), []);
             }
-
+            DB::beginTransaction();
             //  register
             $user = User::create([
                 'first_name' => $request->first_name,
@@ -107,6 +109,11 @@ class AuthController extends Controller
             ]);
 
             if($user){
+                profile::create([
+                    'user_id' => $user->id,
+                ]);
+                DB::commit();
+
                return $this->returnSuccessMessage(__('auth.register_success')  );
 
             }else{
@@ -114,7 +121,8 @@ class AuthController extends Controller
             }
 
         }catch(\Exception $e){
-            // return $this->returnError($e->getMessage(), [], 400);
+            DB::rollBack();
+            return $this->returnError($e->getMessage(), [], 400);
             return $this->returnError(__('message.error'), 500);
 
         }

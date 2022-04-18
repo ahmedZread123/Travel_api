@@ -5,8 +5,10 @@ namespace App\Http\Controllers\API\chat;
 use App\Http\Controllers\Controller;
 use App\Models\message;
 use App\Models\room;
+use App\Models\user_room;
 use Illuminate\Http\Request;
 use App\Traits\GeneralTrait ;
+use Illuminate\Support\Facades\DB;
 
 class Message_controller extends Controller
 {
@@ -51,23 +53,25 @@ class Message_controller extends Controller
             // valedate
             $valedate = validator()->make($request->all() , [
                 'user_id' => 'required|exists:users,id',
-                'room_id' => 'required|exists:rooms,id',
+                'user_send' => 'required|exists:users,id',
+                'room_id' => 'required',
                 'message' => 'required' ,
-            ]);
+            ], $this->message());
 
             if($valedate->fails()){
                 $code = $this->returnCodeAccordingToInput($valedate);
                 return $this->returnValidationError($code, $valedate);
             }
 
+            // check if romm exist
             // save message
              $room = room::find($request->room_id);
              if($room){
                  // check if user is in room
-                 $user =   $room->user()->where('user_id' , $request->user_id)->first();
+                 $user =   $room->user()->where('user_id' , $request->user_send)->first();
                  if($user){
                     $message = message::create([
-                        'user_id'  => $request->user_id ,
+                        'user_id'  => $request->user_send ,
                         'room_id'  => $request->room_id ,
                         'message'  => $request->message ,
                         ]);
@@ -82,12 +86,38 @@ class Message_controller extends Controller
                      return $this->returnError('user not found in room', 404);
                  }
              }else{
-                    return $this->returnError('Room not found', 404);
-             }
+                 DB::beginTransaction() ;
+                  $room =  room::create() ;
+                   user_room::create([
+                          'user_id' => $request->user_id ,
+                          'room_id' => $room->id ,
+                     ] );
+
+                    user_room::create([
+                        'user_id' => $request->user_send,
+                        'room_id' => $room->id ,
+                   ]);
+                        $message = message::create([
+                            'user_id'  => $request->user_send ,
+                            'room_id'  => $room->id ,
+                            'message'  => $request->message ,
+                            ]);
+
+
+                            if($message){
+                                DB::commit() ;
+                                event(new \App\Events\message_event( $message));
+                                return $this->returnData('تم ارسال الرسالة بنجاح ', 'message' , $message);
+                            }else{
+                                return $this->returnError('حدث خطأ يرجا المحاوله مره اخري', [], 404);
+                            }
+
+              }
 
 
 
          }catch(\Exception $ex){
+            DB::rollBack() ;
             return $this->returnError($ex->getMessage(),$ex->getCode());
 
          }
@@ -142,14 +172,5 @@ class Message_controller extends Controller
     }
 
     // end delete message
-
-
-
-
-
-
-
-
-
 
 }

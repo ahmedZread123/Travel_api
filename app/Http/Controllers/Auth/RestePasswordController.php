@@ -33,6 +33,7 @@ class RestePasswordController extends Controller
 
         Mail::to($user->email)->send(new forgetPasswordEmail($code));
         return $this->returnSuccessMessage(__('auth.email_success')) ;
+        return $this->returnData(__('auth.email_success') , 'user_id' , $user->id);
 
     }
 

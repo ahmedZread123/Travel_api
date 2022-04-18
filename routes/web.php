@@ -16,6 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return city::find(1) ;
+    return city::all('city')->dd();
 });
 
