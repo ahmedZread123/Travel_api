@@ -56,9 +56,16 @@ class post extends Model
         return $this->hasMany(share_post::class) ;
     }
 
+    // photo in post
     public function setphotoAttribute($photo)
     {
         $this->attributes['photo'] = json_encode($photo);
+    }
+
+    public function getphotoAttribute($photo)
+    {
+        return json_decode($photo);
+
     }
 
 
