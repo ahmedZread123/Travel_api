@@ -65,7 +65,6 @@ class post extends Model
     public function getphotoAttribute($photo)
     {
         return json_decode($photo);
-
     }
 
 

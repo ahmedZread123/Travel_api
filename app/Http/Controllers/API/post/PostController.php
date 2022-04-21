@@ -70,23 +70,26 @@ class PostController extends Controller
         //
         try{
              $posts = post::where('only', 0)
+             ->with('user' , 'comments' , 'likes' , 'shares' , 'saves')
             -> get();
 
 
             if($posts != []){
-                foreach($posts as $post){
-                    $post->comments = comment::where('post_id', $post->id)->get() ;
-                    $post->likes = like::where('post_id', $post->id)->get() ;
-                    $post->saves = save_psot::where('post_id', $post->id)->get() ;
-                    $post->shares = share_post::where('post_id', $post->id)->get() ;
-                    $post->user = User::find($post->user_id)->select('id','first_name','last_name' ,'photo')->first();
-                    $posts->comments = $post->comments;
-                    $posts->likes = $post->likes;
-                    $posts->saves = $post->saves;
-                    $posts->shares = $post->shares;
-                    $posts->user    = $post->user ;
+                // foreach($posts as $post){
+                //     $post->comments = comment::where('post_id', $post->id)->get() ;
+                //     $post->likes = like::where('post_id', $post->id)->get() ;
+                //     $post->saves = save_psot::where('post_id', $post->id)->get() ;
+                //     $post->shares = share_post::where('post_id', $post->id)->get() ;
+                //     $post->user = User::find($post->user_id)->select('id','first_name','last_name' ,'photo')->first();
+                //     $posts->comments = $post->comments;
+                //     $posts->likes = $post->likes;
+                //     $posts->saves = $post->saves;
+                //     $posts->shares = $post->shares;
+                //     $posts->user    = $post->user ;
 
-                }
+                // }
+                // $posts->with('comments')->with('likes')->with('saves')->with('shares')->with('user')->get();
+
                 return  $this-> returnData( __('message.post_get_all'),'posts' , $posts);
 
             }else{
