@@ -13,9 +13,7 @@ use App\Models\share_post;
 use App\Models\User;
 use App\Models\users_group;
 use App\Traits\GeneralTrait;
-use GuzzleHttp\Psr7\UploadedFile;
-use Hamcrest\Arrays\IsArray;
-use Hamcrest\Type\IsArray as TypeIsArray;
+
 use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
@@ -75,23 +73,7 @@ class PostController extends Controller
 
 
             if($posts != []){
-                // foreach($posts as $post){
-                //     $post->comments = comment::where('post_id', $post->id)->get() ;
-                //     $post->likes = like::where('post_id', $post->id)->get() ;
-                //     $post->saves = save_psot::where('post_id', $post->id)->get() ;
-                //     $post->shares = share_post::where('post_id', $post->id)->get() ;
-                //     $post->user = User::find($post->user_id)->select('id','first_name','last_name' ,'photo')->first();
-                //     $posts->comments = $post->comments;
-                //     $posts->likes = $post->likes;
-                //     $posts->saves = $post->saves;
-                //     $posts->shares = $post->shares;
-                //     $posts->user    = $post->user ;
-
-                // }
-                // $posts->with('comments')->with('likes')->with('saves')->with('shares')->with('user')->get();
-
                 return  $this-> returnData( __('message.post_get_all'),'posts' , $posts);
-
             }else{
                 return $this->returnError(__('message.not_post'), [], 404);
             }
@@ -115,7 +97,7 @@ class PostController extends Controller
                 'text' => 'required',
                 'photo[]' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'user_id' => 'required|exists:users,id',
-                'video' => 'mimes:mp4,mov,ogg,qt|max:20000',
+                'video[]' => 'mimes:mp4,mov,ogg,qt |max:9000000',
                 'group_id' => 'exists:groups,id',
             ],$this->message());
             if($validator->fails()){
@@ -150,7 +132,7 @@ class PostController extends Controller
             if($request->hasFile('photo')){
                 if(is_array($request->photo) ){
                     foreach($request->photo as $photo){
-                    $name[]   = $this->saveImage($photo , 'post_photo');
+                       $name[]   = $this->saveImage($photo , 'post_photo');
                     }
                 }else{
                     $name[]   = $this->saveImage($request->photo , 'post_photo');
@@ -162,8 +144,16 @@ class PostController extends Controller
 
             // save video
             if($request->hasFile('video')){
-                $video = $this->save_videos($request->video , 'post_video');
-             }else{
+                if(is_array($request->video) ){
+                    foreach($request->video as $vide){
+                        $video[] = $this->save_videos($vide , 'post_video');
+                    }
+                }else{
+                     $video[] = $this->save_videos($request->video , 'post_video');
+
+                }
+
+            }else{
                 $video = null;
             }
 
@@ -200,7 +190,7 @@ class PostController extends Controller
             }
         }catch(\Exception $ex){
             DB::rollBack();
-            // return $this->returnError($ex->getMessage(),  500);
+            return $this->returnError($ex->getMessage(),  500);
             return $this->returnError(__('message.error'), [] );
         }
     }
@@ -210,22 +200,19 @@ class PostController extends Controller
     {
         try{
 
-            $post = post::find($id);
-            $user = User::find($post->user_id)->select('id','first_name','last_name' ,'photo')->first() ;
-            if($post){
-                $post->comments = comment::where('post_id', $post->id)->get() ;
-                $post->likes = like::where('post_id', $post->id)->get() ;
-                $post->save_post = save_psot::where('post_id', $post->id)->get() ;
-                $post->share_post = share_post::where('post_id', $post->id)->get() ;
-                $post->user    = $user ;
+            $post = post::where('id', $id)
+                          ->with('user' , 'comments' , 'likes' , 'shares' , 'saves')
+                          -> first();
+            if($post != null ){
 
-                $user->update(['last_seen' => now()]);
+
+                // $user->update(['last_seen' => now()]);
                 return $this->returnData(__('message.post_found'), 'post', $post);
-                        }else{
+            }else{
                 return $this->returnError(__('message.not_post'), [], 404);
             }
         }catch(\Exception $ex){
-            // return $this->returnError($ex->getCode(),$ex->getMessage());
+            return $this->returnError($ex->getCode(),$ex->getMessage());
             return $this->returnError(__('message.error'), [] );
 
         }
@@ -243,7 +230,7 @@ class PostController extends Controller
                 'text' => 'required',
                 'photo[]' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'user_id' => 'required',
-                'video' => 'mimes:mp4,mov,ogg,qt|max:20000',
+                'video[]' => 'mimes:mp4,mov,ogg,qt|max:20000',
 
             ],$this->message());
 
@@ -302,9 +289,17 @@ class PostController extends Controller
 
             // save video
             if($request->hasFile('video')){
-                $video = $this->save_videos($request->video , 'post_video');
+                if(is_array($request->video) ){
+                    foreach($request->video as $vide){
+                        $video = $this->save_videos($vide , 'post_video');
+                    }
+                }else{
+                    $video = $this->save_videos($request->video , 'post_video');
+
+                }
+                // $video = $this->save_videos($request->video , 'post_video');
             }else{
-                $video = $post->video;
+                $video = null;
             }
 
             //create post
@@ -334,8 +329,6 @@ class PostController extends Controller
         }catch(\Exception $e){
             // return $this->returnError($e->getMessage(), [], 500);
             return $this->returnError(__('message.error'), [] );
-
-
         }
     }
 

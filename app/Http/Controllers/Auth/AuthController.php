@@ -42,7 +42,7 @@ class AuthController extends Controller
                 return $this->returnData(__('auth.login_success'), 'user',  $user);
 
             } else {
-                return $this->returnError('auth.login_error', []);
+                return $this->returnError(__('auth.login_error'), []);
             }
 
 

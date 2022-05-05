@@ -22,16 +22,16 @@ class post extends Model
         'user_id',
         'video',
         'group_id' ,
-
-
-
     ];
 
     // user in post
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return  $this->belongsTo(User::class );
     }
+
+    // get user  post
+
 
     // comments in post
     public  function comments()
@@ -65,6 +65,17 @@ class post extends Model
     public function getphotoAttribute($photo)
     {
         return json_decode($photo);
+    }
+
+    // video in post
+    public function setvideoAttribute($video)
+    {
+        $this->attributes['video'] = json_encode($video);
+    }
+
+    public function getvideoAttribute($video)
+    {
+        return json_decode($video);
     }
 
 
